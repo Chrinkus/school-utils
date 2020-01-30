@@ -5,3 +5,6 @@ private_data
 # Vim
 *.swo
 *.swp
+
+# Object files
+*.out
