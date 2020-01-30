@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <json-c/json.h>
+#include <string.h>
 
 enum buf_sizes {
 	buf_name = 32,
@@ -29,9 +30,11 @@ const char* fields[] = {
 	[ehours]  = "Office Hours",
 };
 
-const char* tag_wrap(const char s[static 1], const char t[static 1])
+char* tag_wrap(const char src[static 1], const char tag[static 1])
 {
-	// use snprintf
+	size_t len = strlen(src) + strlen(tag) * 2 + 6;
+	char* s = (char*) malloc(len);
+	snprintf(s, len, "<%s>%s</%s>", tag, src, tag);
 	return s;
 }
 
@@ -70,7 +73,21 @@ int main(int argc, char* argv[argc+1])
 					fields[i], inst);
 			return EXIT_FAILURE;
 		}
-		printf("%s: %s\n", fields[i], json_object_get_string(field));
+		char* s1 = tag_wrap(fields[i], "th");
+		//printf("%s\n", s1);
+		char* s2 = tag_wrap(json_object_get_string(field), "td");
+		//printf("%s\n", s2);
+		size_t len = strlen(s1) + strlen(s2);
+		char s3[len];
+		strcat(s3, s1);
+		strcat(s3, s2);
+		char* s4 = tag_wrap(s3, "tr");
+		printf("%s\n", s4);
+		//printf("%s: %s\n", fields[i], json_object_get_string(field));
+		free(s1);
+		free(s2);
+		free(s3);
+		free(s4);
 	}
 
 	json_object_put(parsed_json);
