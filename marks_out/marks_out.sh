@@ -12,5 +12,6 @@ extract_records() {
 
 extract_records |
 	sed -E 's/#(.*)/\1/' |
-	awk -F, '{ printf "%s\t%-20s%-15s%.0f\n", $1, $2, $3, $(NF-2) }' |
+	#awk -F, '{ printf "%s\t%-20s%-15s%.0f\n", $1, $2, $3, $(NF-2) }' |
+	awk -F, '{ printf "%s\t%-20s%-15s%.0f\n", $1, $2, $3, $4 }' |
 	sort -k 2,3

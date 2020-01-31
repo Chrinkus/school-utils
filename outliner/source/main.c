@@ -38,6 +38,26 @@ char* tag_wrap(const char src[static 1], const char tag[static 1])
 	return s;
 }
 
+char* tag_wrapper(const char src[static 1], const char tag[static 1],
+		const char classes[static 1])
+{
+	static const size_t toh = 6;		// tag overhead: "<></>"
+	static const size_t class_buf = 64;
+
+	char cls[class_buf] = { [0] = '\0' };
+
+	size_t len = strlen(src + strlen(tag) * 2 + toh);
+	if (classes) {
+		snprintf(cls, class_buf, " class=\"%s\"", classes);
+		len += strlen(cls);
+	}
+	char* s = (char*) malloc(len);
+	snprintf(s, len, "<%s%s>%s</%s>", tag, cls, src, tag);
+	return s;
+}
+
+void print_side_table()
+
 int main(int argc, char* argv[argc+1])
 {
 	const char fname[] = "../private_data/instructor.json";
@@ -65,6 +85,7 @@ int main(int argc, char* argv[argc+1])
 		return EXIT_FAILURE;
 	}
 
+	puts("<table>");
 	for (int i = 0; i < num_efields; ++i) {
 		json_object* field = NULL;
 		json_object_object_get_ex(instructor, fields[i], &field);
@@ -79,16 +100,16 @@ int main(int argc, char* argv[argc+1])
 		//printf("%s\n", s2);
 		size_t len = strlen(s1) + strlen(s2);
 		char s3[len];
-		strcat(s3, s1);
+		strcpy(s3, s1);
 		strcat(s3, s2);
 		char* s4 = tag_wrap(s3, "tr");
 		printf("%s\n", s4);
 		//printf("%s: %s\n", fields[i], json_object_get_string(field));
 		free(s1);
 		free(s2);
-		free(s3);
 		free(s4);
 	}
+	puts("</table>");
 
 	json_object_put(parsed_json);
 	return EXIT_SUCCESS;
