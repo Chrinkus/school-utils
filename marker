@@ -1,0 +1,59 @@
+#!/bin/bash
+
+CMD=$(basename -- "$0")
+
+if [ "$#" -lt 1 ]; then
+        echo "Usage: $CMD file.csv"
+        echo "Try '$CMD --help' for more information."
+        exit 1
+fi
+
+# Field widths
+ID=12
+LAST=16
+FIRST=12
+EMAIL=32
+
+# Printf format string
+FMT_HEAD="%-${ID}s %-${LAST}.${LAST}s %-${FIRST}.${FIRST}s %-s\n"
+FMT_LINE="%-${ID}s %-${LAST}.${LAST}s %-${FIRST}.${FIRST}s %3.0f\n"
+
+function print_line() {
+        while read id last first grade; do
+                printf "${FMT_LINE}" "$id" "$last" "$first" "$grade"
+        done
+}
+
+extract_out_filename() {
+	echo "$1" |
+		sed -E 's/^([A-Z]{4}-[0-9]{4}).*([0-9]{6}).*$/\1_\2.txt/'
+}
+
+
+# Default output
+OUTFILE=/dev/stdout
+while [[ $# -gt 1 ]]; do
+        case "$1" in
+                -c|--create)
+                        OUTFILE=$(extract_out_filename "$2")
+                        shift
+                        break
+                        ;;
+        esac
+done
+
+INFILE=$1
+exec 1>"$OUTFILE"
+
+# Print Header
+printf "${FMT_HEAD}" "STUDENT ID" "LAST NAME" "FIRST NAME" "GRADE"
+
+# Print Lines
+cat "$INFILE"           \
+        | tail -n +2    \
+        | tr ' ' '-'    \
+        | tr ',' '\t'   \
+        | cut -f1-3,5   \
+        | sort -k2 -k3  \
+        | print_line
+
